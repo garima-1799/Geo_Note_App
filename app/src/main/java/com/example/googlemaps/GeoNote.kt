@@ -1,11 +1,11 @@
 package com.example.googlemaps
 
 import androidx.room.Entity
-import androidx.room.vo.PrimaryKey
+import androidx.room.PrimaryKey
 
 @Entity(tableName = "geo_notes")
 data class GeoNote(
-    @androidx.room.PrimaryKey(autoGenerate = true)
+    @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val title: String,
     val description: String,

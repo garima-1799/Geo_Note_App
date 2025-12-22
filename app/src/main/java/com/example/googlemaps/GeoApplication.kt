@@ -2,6 +2,7 @@ package com.example.googlemaps
 
 import android.app.Application
 import androidx.room.Room
+import com.google.android.libraries.places.api.Places
 
 class GeoApplication: Application() {
     lateinit var database: AppDatabase
@@ -9,11 +10,14 @@ class GeoApplication: Application() {
 
     override fun onCreate() {
         super.onCreate()
-        database = Room.databaseBuilder(applicationContext,
+       /* database = Room.databaseBuilder(
+            applicationContext,
             AppDatabase::class.java,
-            "geo_notes.db")
-            .build()
-        com.google.android.libraries.places.api.Places.initialize(applicationContext, "AIzaSyCvRqMCadioMVFGF1u89l2wTA6gS6hOjNw")
+            "geo_notes.db"
+        ).build()*/
 
+        if (!Places.isInitialized()) {
+            Places.initialize(applicationContext, getString(R.string.google_api_key))
+        }
     }
 }

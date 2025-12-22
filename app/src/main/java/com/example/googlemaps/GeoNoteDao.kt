@@ -1,20 +1,16 @@
 package com.example.googlemaps
 
-import androidx.room.Delete
+import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
+@Dao
 interface GeoNoteDao {
-    @Query("SELECT * FROM geo_notes")
-    fun getAllNotes(): Flow<List<GeoNote>>
-
-    @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNote(note: GeoNote): Long
 
-    @Delete
-    suspend fun deleteNote(note: GeoNote)
-
-    @Query("DELETE FROM geo_notes")
-    suspend fun deleteAllNotes()
+    @Query("SELECT * FROM geo_notes ORDER BY createdAt DESC")
+    fun getAllNotes(): Flow<List<GeoNote>>
 }
