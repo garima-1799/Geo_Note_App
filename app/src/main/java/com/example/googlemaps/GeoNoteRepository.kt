@@ -7,5 +7,7 @@ class GeoNoteRepository (private val dao: GeoNoteDao){
 
     suspend fun insertNote(note: GeoNote) :Long = dao.insertNote(note)
 
-//    suspend fun deleteNote(note: GeoNote) = dao.deleteNote(note)
+    suspend fun deleteNote(note: GeoNote) = dao.deleteNote(note)
+
+    suspend fun updateNote(note: GeoNote) = dao.updateNote(note)
 }

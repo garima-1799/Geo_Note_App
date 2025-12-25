@@ -35,4 +35,17 @@ class SearchViewModel(
         }
 
     }
+
+    fun updatePlace(place: GeoNote) {
+        viewModelScope.launch {
+            repo.updateNote(place)
+        }
+    }
+
+    fun deletePlace(place: GeoNote) {
+        viewModelScope.launch {
+            repo.deleteNote(place)
+        }
+    }
+
 }

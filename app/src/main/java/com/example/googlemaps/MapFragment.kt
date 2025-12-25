@@ -123,6 +123,11 @@ class MapFragment : Fragment() , OnMapReadyCallback{
                 false
             }
         }
+        map?.setOnInfoWindowClickListener { marker ->
+            val place = marker.tag as? GeoNote ?: return@setOnInfoWindowClickListener
+            showEditDialog(place)
+        }
+
     }
     private fun renderSavedPlaces(places: List<GeoNote>) {
         if (!isMapReady || places.isEmpty()) return
@@ -139,8 +144,9 @@ class MapFragment : Fragment() , OnMapReadyCallback{
                 MarkerOptions()
                     .position(latLng)
                     .title(place.title)
+                    .snippet("Tap to edit")
             )
-
+            marker?.tag = place
             marker?.let {
                 savedMarkers.add(it)
                 boundsBuilder.include(latLng)
@@ -159,6 +165,36 @@ class MapFragment : Fragment() , OnMapReadyCallback{
                 )
             )
         }
+    }
+    private fun showEditDialog(place: GeoNote) {
+        val view = layoutInflater.inflate(R.layout.dialog_save_place, null)
+
+        val titleEt = view.findViewById<EditText>(R.id.name_TV)
+        val descEt = view.findViewById<EditText>(R.id.des_TV)
+
+        // Pre-fill
+        titleEt.setText(place.title)
+        descEt.setText(place.description)
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Edit place")
+            .setView(view)
+
+            .setPositiveButton("Update") { _, _ ->
+                viewModel.updatePlace(
+                    place.copy(
+                        title = titleEt.text.toString(),
+                        description = descEt.text.toString()
+                    )
+                )
+            }
+
+            .setNegativeButton("Delete") { _, _ ->
+                viewModel.deletePlace(place)
+            }
+
+            .setNeutralButton("Cancel", null)
+            .show()
     }
 
     private fun setupPlacesAutocomplete() {
