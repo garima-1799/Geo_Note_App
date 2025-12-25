@@ -24,6 +24,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.libraries.places.api.model.Place
@@ -39,8 +40,9 @@ class MapFragment : Fragment() , OnMapReadyCallback{
     private var shouldFollowUser = true
     private lateinit var viewModel: SearchViewModel
     private var searchedMarker: Marker? = null
-
-    private var selectedLatLng: LatLng? = null
+    private val savedMarkers = mutableListOf<Marker>()
+    private var isMapReady = false
+    private var latestPlaces: List<GeoNote> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,13 +66,9 @@ class MapFragment : Fragment() , OnMapReadyCallback{
         viewModel = SearchViewModel(repository)
         lifecycleScope.launchWhenStarted {
             viewModel.savedPlaces.collect { places ->
-                map?.clear()
-                places.forEach { place ->
-                    map?.addMarker(
-                        MarkerOptions()
-                            .position(LatLng(place.latitude, place.longitude))
-                            .title(place.title)
-                    )
+                latestPlaces = places
+                if (isMapReady) {
+                    renderSavedPlaces(places)
                 }
             }
         }
@@ -112,7 +110,11 @@ class MapFragment : Fragment() , OnMapReadyCallback{
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
+        isMapReady = true
+
         checkPermissionAndStart()
+        renderSavedPlaces(latestPlaces)
+
         map?.setOnMarkerClickListener { marker ->
             if (marker == searchedMarker) {
                 showSaveDialog(marker.position)
@@ -122,10 +124,45 @@ class MapFragment : Fragment() , OnMapReadyCallback{
             }
         }
     }
+    private fun renderSavedPlaces(places: List<GeoNote>) {
+        if (!isMapReady || places.isEmpty()) return
+
+        savedMarkers.forEach { it.remove() }
+        savedMarkers.clear()
+
+        val boundsBuilder = LatLngBounds.Builder()
+
+        places.forEach { place ->
+            val latLng = LatLng(place.latitude, place.longitude)
+
+            val marker = map?.addMarker(
+                MarkerOptions()
+                    .position(latLng)
+                    .title(place.title)
+            )
+
+            marker?.let {
+                savedMarkers.add(it)
+                boundsBuilder.include(latLng)
+            }
+        }
+
+        if (places.size > 1) {
+            map?.animateCamera(
+                CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 150)
+            )
+        } else {
+            map?.animateCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    LatLng(places[0].latitude, places[0].longitude),
+                    15f
+                )
+            )
+        }
+    }
+
     private fun setupPlacesAutocomplete() {
-        val autocompleteFragment =
-            childFragmentManager.findFragmentById(R.id.autocomplete_fragment)
-                    as AutocompleteSupportFragment
+        val autocompleteFragment = childFragmentManager.findFragmentById(R.id.autocomplete_fragment) as AutocompleteSupportFragment
 
         autocompleteFragment.setPlaceFields(
             listOf(
@@ -147,15 +184,13 @@ class MapFragment : Fragment() , OnMapReadyCallback{
 
                 override fun onPlaceSelected(place: Place) {
                     place.latLng?.let { latLng ->
-                        map?.clear()
                         searchedMarker = map?.addMarker(
                             MarkerOptions()
                                 .position(latLng)
                                 .title(place.name)
                         )
 
-                        map?.animateCamera(
-                            CameraUpdateFactory.newLatLngZoom(latLng, 15f)
+                        map?.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f)
                         )
                     }
                 }
@@ -169,11 +204,7 @@ class MapFragment : Fragment() , OnMapReadyCallback{
                 android.Manifest.permission.ACCESS_FINE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            ActivityCompat.requestPermissions(
-                activity,
-                arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),
-                100
-            )
+            ActivityCompat.requestPermissions(activity, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 100)
         } else {
             startLocationUpdates()
         }
