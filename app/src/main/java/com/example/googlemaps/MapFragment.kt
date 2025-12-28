@@ -1,6 +1,8 @@
 package com.example.googlemaps
 
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.Looper
 import androidx.fragment.app.Fragment
@@ -23,6 +25,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Marker
@@ -139,12 +142,16 @@ class MapFragment : Fragment() , OnMapReadyCallback{
 
         places.forEach { place ->
             val latLng = LatLng(place.latitude, place.longitude)
+            val bitmap = BitmapFactory.decodeResource(resources, R.drawable.saved_place_img)
+            val smallBitmap = Bitmap.createScaledBitmap(bitmap, 90, 90, false)
+            val icon = BitmapDescriptorFactory.fromBitmap(smallBitmap)
 
             val marker = map?.addMarker(
                 MarkerOptions()
                     .position(latLng)
                     .title(place.title)
                     .snippet("Tap to edit")
+                    .icon(icon)
             )
             marker?.tag = place
             marker?.let {
@@ -211,11 +218,13 @@ class MapFragment : Fragment() , OnMapReadyCallback{
         autocompleteFragment.setOnPlaceSelectedListener(
             object : PlaceSelectionListener {
                 override fun onError(status: Status) {
-                    Toast.makeText(
-                        requireContext(),
-                        status.statusMessage,
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    if (status.statusCode == Status.RESULT_CANCELED.statusCode) {
+                        // User pressed back — NOT a real error, so ignore
+                        return
+                    }
+
+                    Toast.makeText(requireContext(), "Something went wrong", Toast.LENGTH_SHORT).show()
+
                 }
 
                 override fun onPlaceSelected(place: Place) {
@@ -280,7 +289,6 @@ class MapFragment : Fragment() , OnMapReadyCallback{
                 }
             }
         }
-
         fusedLocationClient.requestLocationUpdates(
             locationRequest,
             locationCallback,
