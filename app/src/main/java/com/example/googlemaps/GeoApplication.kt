@@ -1,7 +1,7 @@
 package com.example.googlemaps
 
 import android.app.Application
-import androidx.room.Room
+import com.example.googlemaps.data.local.AppDatabase
 import com.google.android.libraries.places.api.Places
 
 class GeoApplication: Application() {

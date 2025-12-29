@@ -1,7 +1,9 @@
-package com.example.googlemaps
+package com.example.googlemaps.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.googlemaps.data.local.GeoNote
+import com.example.googlemaps.data.repository.GeoNoteRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn

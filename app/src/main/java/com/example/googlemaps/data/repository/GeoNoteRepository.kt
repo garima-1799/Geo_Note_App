@@ -1,6 +1,8 @@
-package com.example.googlemaps
+package com.example.googlemaps.data.repository
 
-import kotlinx.coroutines.flow.Flow;
+import com.example.googlemaps.data.local.GeoNote
+import com.example.googlemaps.data.local.GeoNoteDao
+import kotlinx.coroutines.flow.Flow
 
 class GeoNoteRepository (private val dao: GeoNoteDao){
     fun allNotes():Flow<List<GeoNote>> =  dao.getAllNotes()

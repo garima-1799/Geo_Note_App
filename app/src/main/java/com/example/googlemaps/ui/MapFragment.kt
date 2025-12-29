@@ -1,10 +1,14 @@
-package com.example.googlemaps
+package com.example.googlemaps.ui
 
+import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Bundle
 import android.os.Looper
+import android.provider.Settings
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -14,6 +18,11 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
+import com.example.googlemaps.R
+import com.example.googlemaps.viewmodel.SearchViewModel
+import com.example.googlemaps.data.local.AppDatabase
+import com.example.googlemaps.data.local.GeoNote
+import com.example.googlemaps.data.repository.GeoNoteRepository
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -46,6 +55,7 @@ class MapFragment : Fragment() , OnMapReadyCallback{
     private val savedMarkers = mutableListOf<Marker>()
     private var isMapReady = false
     private var latestPlaces: List<GeoNote> = emptyList()
+    private val LOCATION_PERMISSION_REQUEST = 1001
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -143,7 +153,7 @@ class MapFragment : Fragment() , OnMapReadyCallback{
         places.forEach { place ->
             val latLng = LatLng(place.latitude, place.longitude)
             val bitmap = BitmapFactory.decodeResource(resources, R.drawable.saved_place_img)
-            val smallBitmap = Bitmap.createScaledBitmap(bitmap, 90, 90, false)
+            val smallBitmap = Bitmap.createScaledBitmap(bitmap, 50, 70, false)
             val icon = BitmapDescriptorFactory.fromBitmap(smallBitmap)
 
             val marker = map?.addMarker(

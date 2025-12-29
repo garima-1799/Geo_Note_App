@@ -1,4 +1,4 @@
-package com.example.googlemaps
+package com.example.googlemaps.ui
 
 import android.app.AlertDialog
 import android.app.Dialog
@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.EditText
 import androidx.fragment.app.DialogFragment
+import com.example.googlemaps.R
 import com.google.android.gms.maps.model.LatLng
 import kotlin.text.isNotBlank
 
