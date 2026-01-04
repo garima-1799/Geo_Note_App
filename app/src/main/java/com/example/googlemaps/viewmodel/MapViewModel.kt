@@ -1,17 +1,30 @@
 package com.example.googlemaps.viewmodel
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.googlemaps.data.local.GeoNote
 import com.example.googlemaps.data.repository.GeoNoteRepository
+//import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class SearchViewModel(
+class MapViewModel (
     private val repo: GeoNoteRepository
 ) : ViewModel() {
+    val selectedPlace = MutableSharedFlow<GeoNote>()
+    val place = selectedPlace.asSharedFlow()
+//    val savedPlace = repo.allNotes()
+
+    fun selectPlace(note: GeoNote) {
+        viewModelScope.launch {
+            selectedPlace.emit(note)
+        }
+    }
     val savedPlaces: StateFlow<List<GeoNote>> =
         repo.allNotes()
             .stateIn(
@@ -49,5 +62,7 @@ class SearchViewModel(
             repo.deleteNote(place)
         }
     }
-
+//    suspend fun clearSelection() {
+//        selectedPlace.emit(null)
+//    }
 }

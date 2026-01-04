@@ -10,7 +10,7 @@ import com.example.googlemaps.R
 import com.google.android.gms.maps.model.LatLng
 import kotlin.text.isNotBlank
 
-class SavePlaceDialogFragment(
+class SavePlaceDialog(
     private val latLng: LatLng,
     private val onSave: (String, String?) -> Unit
 ) : DialogFragment() {

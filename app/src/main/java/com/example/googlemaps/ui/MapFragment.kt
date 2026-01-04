@@ -1,14 +1,10 @@
 package com.example.googlemaps.ui
 
-import android.Manifest
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.Bundle
 import android.os.Looper
-import android.provider.Settings
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -17,9 +13,11 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import com.example.googlemaps.MainActivity
 import com.example.googlemaps.R
-import com.example.googlemaps.viewmodel.SearchViewModel
+import com.example.googlemaps.viewmodel.MapViewModel
 import com.example.googlemaps.data.local.AppDatabase
 import com.example.googlemaps.data.local.GeoNote
 import com.example.googlemaps.data.repository.GeoNoteRepository
@@ -50,13 +48,14 @@ class MapFragment : Fragment() , OnMapReadyCallback{
     private lateinit var locationCallback: LocationCallback
     private var currentMarker: Marker? = null
     private var shouldFollowUser = true
-    private lateinit var viewModel: SearchViewModel
     private var searchedMarker: Marker? = null
+    private var savedPlace : GeoNote? = null
     private val savedMarkers = mutableListOf<Marker>()
     private var isMapReady = false
     private var latestPlaces: List<GeoNote> = emptyList()
-    private val LOCATION_PERMISSION_REQUEST = 1001
-
+    private val viewModel: MapViewModel by activityViewModels {
+        (requireActivity() as MainActivity).viewModelFactory
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -71,18 +70,32 @@ class MapFragment : Fragment() , OnMapReadyCallback{
         super.onViewCreated(view, savedInstanceState)
         setupPlacesAutocomplete()
         setupMap()
-        fusedLocationClient =
-            LocationServices.getFusedLocationProviderClient(requireActivity())
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
         val appDatabase = AppDatabase.getInstance(requireContext())
         val repository = GeoNoteRepository(appDatabase.geoNoteDao())
-        viewModel = SearchViewModel(repository)
+
         lifecycleScope.launchWhenStarted {
             viewModel.savedPlaces.collect { places ->
                 latestPlaces = places
                 if (isMapReady) {
                     renderSavedPlaces(places)
                 }
+            }
+        }
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.selectedPlace.collect { place ->
+                moveToPlaceOnMap(place)
+                savedPlace = place
+               /* savedMarker = map?.addMarker(
+                        MarkerOptions()
+                            .position(latLng)
+                            .title(place.title)
+                    )*/
+
+//                showEditDialog(place)
+//                viewModel.clearSelection()
             }
         }
     }
@@ -132,15 +145,23 @@ class MapFragment : Fragment() , OnMapReadyCallback{
             if (marker == searchedMarker) {
                 showSaveDialog(marker.position)
                 true
-            } else {
-                false
+            } else if (savedPlace !=null) {
+                showEditDialog(savedPlace!!)
+                true
             }
+            else
+                false
         }
         map?.setOnInfoWindowClickListener { marker ->
             val place = marker.tag as? GeoNote ?: return@setOnInfoWindowClickListener
             showEditDialog(place)
         }
 
+    }
+    private fun moveToPlaceOnMap(place: GeoNote) {
+        val latLng = LatLng(place.latitude, place.longitude)
+        map?.addMarker(MarkerOptions().position(latLng))
+        map?.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
     }
     private fun renderSavedPlaces(places: List<GeoNote>) {
         if (!isMapReady || places.isEmpty()) return
@@ -189,29 +210,29 @@ class MapFragment : Fragment() , OnMapReadyCallback{
         val titleEt = view.findViewById<EditText>(R.id.name_TV)
         val descEt = view.findViewById<EditText>(R.id.des_TV)
 
-        // Pre-fill
-        titleEt.setText(place.title)
-        descEt.setText(place.description)
+            titleEt.setText(place.title)
+            descEt.setText(place.description)
 
-        AlertDialog.Builder(requireContext())
-            .setTitle("Edit place")
-            .setView(view)
+            AlertDialog.Builder(requireContext())
+                .setTitle("Edit place")
+                .setView(view)
 
-            .setPositiveButton("Update") { _, _ ->
-                viewModel.updatePlace(
-                    place.copy(
-                        title = titleEt.text.toString(),
-                        description = descEt.text.toString()
+                .setPositiveButton("Update") { _, _ ->
+                    viewModel.updatePlace(
+                        place.copy(
+                            title = titleEt.text.toString(),
+                            description = descEt.text.toString()
+                        )
                     )
-                )
-            }
+                }
 
-            .setNegativeButton("Delete") { _, _ ->
-                viewModel.deletePlace(place)
-            }
+                .setNegativeButton("Delete") { _, _ ->
+                    viewModel.deletePlace(place)
+                }
 
-            .setNeutralButton("Cancel", null)
-            .show()
+                .setNeutralButton("Cancel", null)
+                .show()
+
     }
 
     private fun setupPlacesAutocomplete() {
@@ -244,6 +265,7 @@ class MapFragment : Fragment() , OnMapReadyCallback{
                                 .position(latLng)
                                 .title(place.name)
                         )
+                        showSaveDialog(latLng)
 
                         map?.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f)
                         )

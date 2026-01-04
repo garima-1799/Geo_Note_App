@@ -3,7 +3,9 @@ package com.example.googlemaps
 import android.app.Application
 import com.example.googlemaps.data.local.AppDatabase
 import com.google.android.libraries.places.api.Places
+//import dagger.hilt.android.HiltAndroidApp
 
+//@HiltAndroidApp
 class GeoApplication: Application() {
     lateinit var database: AppDatabase
         private set

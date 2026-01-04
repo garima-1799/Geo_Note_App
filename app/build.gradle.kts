@@ -1,7 +1,10 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+//    alias(libs.plugins.hilt)
+//    alias(libs.plugins.ksp)
     id("org.jetbrains.kotlin.kapt")
+//    kotlin("kapt")
 }
 
 android {
@@ -31,6 +34,8 @@ android {
         }
     }
     compileOptions {
+//        sourceCompatibility = JavaVersion.VERSION_17
+//        targetCompatibility = JavaVersion.VERSION_17
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
@@ -47,6 +52,9 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     //ksp(libs.androidx.room.compiler)
+    implementation(libs.fragment.ktx)
+//    kapt(libs.androidx.room.compiler)
+//    ksp(libs.androidx.room.compiler)
     kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
     testImplementation(libs.junit)
@@ -57,4 +65,12 @@ dependencies {
     implementation (libs.google.places)
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.lifecycle.runtime.ktx)
+//    implementation(libs.hilt.android)
+//    kapt(libs.hilt.compiler)
+//    ksp(libs.hilt.compiler)
+//    implementation(libs.androidx.room.runtime)
+
+//    implementation(libs.javapoet)
+
+//    implementation(libs.hilt.navigation.fragment)
 }
