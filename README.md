@@ -4,77 +4,83 @@ GeoNote is an Android app that lets users search places on Google Maps, save the
 
 ✨ Features
 
-🗺️ Google Maps with current location
+ 🗺️ Google Maps with current location
 
 🔍 Place search using Google Places API
 
-📌 Save places with title & description
+📌 Save places with title and description
 
-🗂️ View saved places in a list
+🗂️ View all saved places in a list
 
-🔄 Map ↔ List synchronization
+🔄 Map ↔ Saved Places synchronization
 
-✏️ Edit & delete saved places
+✏️ Edit & delete saved places via marker info window
+
+🧭 TabLayout navigation (Map / Saved Places)
+
+🚫 Swipe disabled to avoid accidental navigation
+
+📸 Screenshots
+
+<img width="540" height="1170" alt="Screenshot_20260104_225608"
+src="https://github.com/user-attachments/assets/8c16ec77-82c9-4982-9fdc-c74ccc45aaf7" />  <img width="540" height="1170" alt="Screenshot_20260104_225710" src="https://github.com/user-attachments/assets/3563132d-e14e-4bd1-ac85-943f822a90b4" />  <img width="540" height="1170" alt="Screenshot_20260104_225817" src="https://github.com/user-attachments/assets/f9714165-c71b-4b0c-b08b-a16c37ae2574" />  <img width="540" height="1170" alt="Screenshot_20260104_225832" src="https://github.com/user-attachments/assets/3934fbe4-0ead-4a8a-bf7f-a8cb3d47698d" />
 
 🏗️ Architecture
 
+   Built using MVVM architecture with a shared ViewModel:
+			 MainActivity
 
-Built using MVVM architecture with a shared ViewModel:
-MainActivity
-
- ├── MapFragment
+   ├── MapFragment
  
- ├── SavedPlacesFragment
- 
- └── MapViewModel
-       ↓
-   Repository
-       ↓
-     Room DB
+   ├── SavedPlacesFragment
+  
+   └── MapViewModel
+         ↓
+     Repository
+         ↓
+       Room DB
 
 
-Single source of truth
+   Single source of truth
 
-No fragment-to-fragment communication
+   No fragment-to-fragment communication
 
-State handled using StateFlow
+   State handled using StateFlow
 
 
 🛠️ Tech Stack
 
+   Kotlin
 
-Kotlin
+   MVVM
 
-MVVM
+   Google Maps & Places API
 
-Google Maps & Places API
+   Room Database
 
-Room Database
+   Coroutines & StateFlow
 
-Coroutines & StateFlow
-
-RecyclerView + ListAdapter + DiffUtil
-
+   RecyclerView + ListAdapter + DiffUtil
 
 🚀 How It Works
 
+   Saving a place updates the database
 
-Saving a place updates the database
+   List updates automatically via StateFlow
 
-List updates automatically via StateFlow
+   Clicking a saved place switches to the Map tab
 
-Clicking a saved place switches to the Map tab
-
-The camera moves to the selected location and highlights the marker
+   The camera moves to the selected location and highlights the marker
 
 
 📌 Author
 
-Garima Biswakarma
+   Garima Biswakarma
 
-Android Developer
+   Android Developer
 
-Portfolio project focused on clean architecture and real-world Android patterns.
+   Portfolio project focused on clean architecture and real-world Android 
+   patterns.
 
 
 
