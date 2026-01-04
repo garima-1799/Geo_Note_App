@@ -173,8 +173,8 @@ class MapFragment : Fragment() , OnMapReadyCallback{
 
         places.forEach { place ->
             val latLng = LatLng(place.latitude, place.longitude)
-            val bitmap = BitmapFactory.decodeResource(resources, R.drawable.saved_place_img)
-            val smallBitmap = Bitmap.createScaledBitmap(bitmap, 50, 70, false)
+            val bitmap = BitmapFactory.decodeResource(resources, R.drawable.saved_place_icon)
+            val smallBitmap = Bitmap.createScaledBitmap(bitmap, 100, 110, false)
             val icon = BitmapDescriptorFactory.fromBitmap(smallBitmap)
 
             val marker = map?.addMarker(
